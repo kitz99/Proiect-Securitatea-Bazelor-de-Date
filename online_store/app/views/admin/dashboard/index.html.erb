@@ -1,0 +1,14 @@
+<div class="col-md-4">
+  <ul class="users">
+    <% @users.each do |user| %>
+      <li><%= user.user_name %></li>
+    <% end %>
+  </ul>
+</div>
+<div class="col-md-8">
+  <ul>
+    <% @products.each do |p| %>
+      <li><%= p.name  %> | <%= link_to :edit, edit_admin_product_path(p.id) %></li>
+    <% end %>
+  </ul>
+</div>

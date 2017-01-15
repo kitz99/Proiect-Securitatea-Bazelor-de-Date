@@ -1,0 +1,6 @@
+class AddQuantityToLineItems < ActiveRecord::Migration
+  def change
+    default: 1
+    add_column :line_items, :quantity, :integer
+  end
+end

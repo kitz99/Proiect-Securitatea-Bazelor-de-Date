@@ -1,0 +1,11 @@
+<div class="col-md-8">
+  <%= bootstrap_form_for([:admin, @product], label_col: "col-md-4", control_col: "col-md-4") do |f| %>
+    <%= f.text_field :name %>
+    <%= f.number_field :price, step: :any %>
+
+    <%= form_actions do %>
+      <%= link_to 'Cancel', '/dashboard', class: 'btn btn-default' %>
+      <%= f.primary 'Save' %>
+    <% end %>
+  <% end %>
+</div>

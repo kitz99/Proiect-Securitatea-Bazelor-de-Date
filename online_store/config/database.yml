@@ -1,0 +1,18 @@
+login: &login
+  host:     localhost
+  port:     5432
+  pool:     5
+  reconnect: true
+  adapter:  postgresql
+  username: develop
+  password: 142536
+  template: template0
+  encoding: UTF8
+
+development:
+  database: online_store_dev
+  <<: *login
+
+test:
+  database: online_store_test
+  <<: *login

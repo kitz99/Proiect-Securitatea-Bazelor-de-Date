@@ -1,0 +1,17 @@
+<% @products.each do |prod| %>
+  <div class="col-sm-3">
+    <div class="card">
+      <img class="card-img-top" src="<%= prod.image_url %>">
+      <div class="card-block">
+        <h5 class="card-title"><%= truncate(prod.name, :length => 50) %></h5>
+        <h6 class="price"><%= prod.price %> RON</h6>
+        <p class="card-text"><%= prod.description %></p>
+        <a href="#" class="btn btn-primary">Cumpara Acum</a>
+      </div>
+    </div>
+  </div>
+<% end %>
+<div class="col-md-12" style="text-align: center">
+  <%= will_paginate @products %>
+</div>
+

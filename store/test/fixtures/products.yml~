@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  description: MyText
+  image_url: MyString.png
+  price: 9.99
+
+two:
+  title: MySecondString
+  description: MyText
+  image_url: MyString.png
+  price: 9.99

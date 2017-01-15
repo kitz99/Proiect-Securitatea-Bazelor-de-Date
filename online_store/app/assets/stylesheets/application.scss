@@ -1,0 +1,13 @@
+@import "bootstrap";
+@import "rails_bootstrap_forms";
+@import './*';
+
+.list-right {
+  float: right; 
+  list-style-type: none;
+}
+
+.list-right li {
+  float: left;
+  margin-right: 5px;
+}
