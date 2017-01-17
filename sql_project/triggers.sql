@@ -68,6 +68,10 @@ SELECT exec_query( 'CREATE TRIGGER '
         || 'public_populate_updated_at_on_'|| tab_name
         || ' BEFORE UPDATE ON ' || tab_name_q
         || ' FOR EACH ROW EXECUTE PROCEDURE complete_updated_at();') AS trigger_creation_query
+      exec_query('CREATE TRIGGER '
+        || 'public_add_audit_trigger_on_'|| tab_name
+        || ' AFTER INSERT OR UPDATE OR DELETE ON ' || tab_name_q
+        || ' FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();') as trigger_for_audit
 FROM (
     SELECT
         quote_ident(table_schema) || '.' || quote_ident(table_name) as tab_name_q,
