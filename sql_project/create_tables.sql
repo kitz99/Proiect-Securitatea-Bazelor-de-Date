@@ -1,5 +1,7 @@
 ﻿CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+CREATE EXTENSION pgcrypto;
 SET search_path = public, pg_catalog;
 SET default_tablespace = '';
 SET default_with_oids = false;
@@ -19,8 +21,8 @@ CREATE TABLE users (
     last_sign_in_at timestamp without time zone,
     current_sign_in_ip inet,
     last_sign_in_ip inet,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 ALTER TABLE ONLY users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 CREATE SEQUENCE users_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
@@ -139,3 +141,6 @@ ALTER TABLE ONLY cart_lines ADD CONSTRAINT cart_lines_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY cart_lines ALTER COLUMN id SET DEFAULT nextval('cart_lines_id_seq'::regclass);
 CREATE SEQUENCE cart_lines_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE cart_lines_id_seq OWNED BY cart_lines.id;
+
+GRANT INSERT ON products TO root;
+REVOKE INSERT on products from client;

