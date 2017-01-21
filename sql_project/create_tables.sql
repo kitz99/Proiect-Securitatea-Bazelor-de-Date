@@ -2,6 +2,7 @@
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 CREATE EXTENSION pgcrypto;
+
 SET search_path = public, pg_catalog;
 SET default_tablespace = '';
 SET default_with_oids = false;
@@ -105,8 +106,8 @@ CREATE INDEX index_users_carts_on_user_id_and_cart_id ON users_roles USING btree
 --------------------------------------
 CREATE TABLE orders (
     id integer NOT NULL,
-    pay_type character varying,
-    delivery_method varying,
+    pay_type text,
+    delivery_method text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
 );
@@ -120,7 +121,7 @@ CREATE TABLE users_orders (
     user_id integer NOT NULL,
     order_id integer NOT NULL,
     total_price double precision NOT NULL,
-    delivery_address varying NOT NULL,
+    delivery_address text NOT NULL,
     delivered boolean default FALSE
 );
 ALTER TABLE ONLY users_orders ADD CONSTRAINT users_orders_pkey PRIMARY KEY (user_id, order_id);
@@ -142,5 +143,26 @@ ALTER TABLE ONLY cart_lines ALTER COLUMN id SET DEFAULT nextval('cart_lines_id_s
 CREATE SEQUENCE cart_lines_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE cart_lines_id_seq OWNED BY cart_lines.id;
 
+
+CREATE TABLE order_lines (
+    id integer NOT NULL,
+    product_id integer,
+    order_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+ALTER TABLE ONLY order_lines ADD CONSTRAINT order_lines_pkey PRIMARY KEY (id);
+CREATE SEQUENCE order_lines_id_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+ALTER TABLE ONLY order_lines ALTER COLUMN id SET DEFAULT nextval('orderlines_id_seq'::regclass);
+ALTER SEQUENCE order_lines_id_seq OWNED BY order_lines.id;
+
 GRANT INSERT ON products TO root;
-REVOKE INSERT on products from client;
+GRANT DELETE ON products TO root;
+GRANT UPDATE on products TO root;
+
+
+REVOKE INSERT ON products FROM client;
+REVOKE DELETE ON products FROM client;
+REVOKE UPDATE on products FROM client;
+
+

@@ -1,6 +1,9 @@
+-- create new schema for audit
 CREATE schema audit;
+-- revoke create over schema from public role;
 REVOKE CREATE ON schema audit FROM public;
 
+-- build logged_actions table where we will store audit logs
 CREATE TABLE audit.logged_actions (
     schema_name text NOT NULL,
     TABLE_NAME text NOT NULL,
@@ -11,6 +14,8 @@ CREATE TABLE audit.logged_actions (
     new_data text,
     query text
 ) WITH (fillfactor=100);
+
+-- build root_specific logs table
 
 CREATE TABLE audit.root_actions (
     schema_name text NOT NULL,
@@ -23,6 +28,7 @@ CREATE TABLE audit.root_actions (
     query text
 ) WITH (fillfactor=100);
 
+-- revoke ALL right of new table from public
 REVOKE ALL ON audit.logged_actions FROM public;
 REVOKE ALL ON audit.root_actions FROM public;
 
@@ -124,4 +130,6 @@ END;
 $body$
 LANGUAGE plpgsql
 SECURITY DEFINER
+
+-- set search path to include new created audit schema.
 SET search_path = pg_catalog, audit;

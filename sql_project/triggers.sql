@@ -1,6 +1,7 @@
 -- T R I G G E R  F U N C T I O N S
 --
 -- populate created at
+-- set of triggers to populate created_at and updated at ---> audint changes in the table.
 CREATE OR REPLACE FUNCTION complete_created_at() RETURNS TRIGGER AS $$
   declare
   time_now timestamp;
@@ -12,7 +13,6 @@ CREATE OR REPLACE FUNCTION complete_created_at() RETURNS TRIGGER AS $$
     return new;
         END
 $$ LANGUAGE plpgsql;
-
 
 CREATE OR REPLACE FUNCTION complete_updated_at() RETURNS TRIGGER AS $$
   declare
@@ -27,6 +27,8 @@ $$ LANGUAGE plpgsql;
 
 
 
+-- trigger that hashes user's password for secure storage
+
 CREATE OR REPLACE FUNCTION hash_user_passwd() RETURNS TRIGGER AS $$
     BEGIN
         new.encrypted_password = crypt(new.encrypted_password, gen_salt('bf', 8));
@@ -35,6 +37,7 @@ CREATE OR REPLACE FUNCTION hash_user_passwd() RETURNS TRIGGER AS $$
 $$ LANGUAGE plpgsql;
 
 -- Create trigger to encrypt user's payment card number
+-- card number will be encrypted with blow-fish-cbc with padding for secure storage
 CREATE OR REPLACE FUNCTION encrypt_user_payment() RETURNS TRIGGER AS $$
   DECLARE
   enc bytea;
@@ -44,9 +47,7 @@ CREATE OR REPLACE FUNCTION encrypt_user_payment() RETURNS TRIGGER AS $$
     return new;
   END
 $$ LANGUAGE plpgsql;
-
 ALTER TABLE users ADD COLUMN payment varchar(255);
-
 CREATE TRIGGER users_encrypt_payment_trigger_bf BEFORE UPDATE OF payment ON users
   FOR EACH ROW EXECUTE PROCEDURE encrypt_user_payment();
 
@@ -59,13 +60,9 @@ CREATE OR REPLACE FUNCTION decrypt_user_payment(user_id integer) RETURNS TEXT AS
 $$ LANGUAGE plpgsql;
 
 
--- UPDATE users set payment = '1112223333' where id = 2;
--- SELECT decrypt_user_payment(users.id) from users where id = 2;
-
 
 -- U T I L S
 -- dynamic query runner
-
 CREATE OR REPLACE FUNCTION exec_query(qry varchar) RETURNS VOID AS $$
   BEGIN
    EXECUTE qry;

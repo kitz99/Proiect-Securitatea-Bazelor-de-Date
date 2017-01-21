@@ -1,6 +1,6 @@
 -- F U N C T I O N S
 
--- Vulnerable function to verify login
+-- Vulnerable function to verify login. Will gain access to specific user without password or will dump all users from the database
 CREATE OR REPLACE FUNCTION login_vn(em varchar, passwd varchar)
   RETURNS SETOF users AS
 $func$
@@ -11,6 +11,9 @@ BEGIN
 END
 $func$  LANGUAGE plpgsql;
 
+
+-- In table audit login.
+-- Function will counter how many times an user do login
 CREATE OR REPLACE FUNCTION audit_login(user_id integer) RETURNS void AS
 $func$
 DECLARE
@@ -24,6 +27,7 @@ END
 $func$  LANGUAGE plpgsql;
 
 
+-- safe login function wich not permit sql injection.
 CREATE OR REPLACE function login_safe(em varchar, passwd varchar) RETURNS varchar AS $$
 DECLARE
   nr_users integer;
@@ -41,11 +45,8 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-SELECT login_safe('bogdan5@test.com', '159789');
-SELECT * from users where email = 'bogdan5@test.com';
-
--- Vulnerable search function
-CREATE OR REPLACE FUNCTION cauta_produs_new(q text) RETURNS SETOF text AS 
+-- Vulnerable search function. Attaker will be able to obtain users payment card number.
+CREATE OR REPLACE FUNCTION cauta_produs_vuln(q text) RETURNS SETOF text AS 
 $func$
   BEGIN
     RETURN QUERY EXECUTE
@@ -56,5 +57,51 @@ $func$
   END
 $func$  LANGUAGE plpgsql;
 
-SELECT cauta_produs_new('watch%'' UNION SELECT users.id::text || ''-->'' ||payment::text as payment from users;--''');
+-- SELECT cauta_produs_vuln('watch%'' UNION SELECT users.id::text || ''-->'' ||payment::text as payment from users;--''');
 
+-- secure function to search products;
+CREATE OR REPLACE FUNCTION cauta_produs_secure(q text) RETURNS products AS 
+$func$
+  DECLARE 
+  prod products;
+  BEGIN
+    SELECT array_agg(products.name) into prod from products where name ilike '%' || q || '%';
+    return prod;
+  END
+$func$  LANGUAGE plpgsql;
+
+select cauta_produs_secure('apple');
+
+
+-- functii aplicate pe produse in raport cu useri
+-- SQL dynamic
+CREATE OR REPLACE FUNCTION apply_functions(fn_name text) RETURNS setof text AS 
+$func$
+  DECLARE 
+  result text;
+  select_statement text;
+  order_statement text;
+  BEGIN
+  IF(fn_name = 'avg') THEN
+    select_statement = 'SELECT users.id::text || ''-->'' || avg(products.price)::text ';
+    order_statement = ' ORDER BY avg(products.price) DESC';
+  ELSIF (fn_name = 'sum') THEN
+    select_statement = 'SELECT users.id::text || ''-->'' || sum(products.price)::text ';
+    order_statement = ' ORDER BY sum(products.price) DESC';
+  ELSIF (fn_name = 'count') THEN
+    select_statement = 'SELECT users.id::text || ''-->'' || count(products.id)::text ';
+    order_statement = ' ORDER BY count(products.id) DESC';
+  ELSE
+    RAISE WARNING 'No function available';
+  END IF;
+
+  RETURN QUERY EXECUTE
+    select_statement || 'FROM products
+             JOIN order_lines on order_lines.product_id = products.id
+                                     JOIN users_orders on users_orders.order_id = order_lines.order_id
+                                     JOIN users on users.id = users_orders.user_id
+                                     group by users.id' 
+                                  || order_statement;
+
+  END
+$func$  LANGUAGE plpgsql;
